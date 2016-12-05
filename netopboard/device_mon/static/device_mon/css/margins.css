@@ -1,0 +1,29 @@
+/* 上方向のmargin */
+.block-mt-sm {
+  margin-top: 15px;
+}
+.block-mt-md {
+  margin-top: 30px;
+}
+.block-mt-lg {
+  margin-top: 60px;
+}
+
+/* 下方向のmargin */
+.block-mb-sm {
+  margin-bottom: 15px;
+}
+.block-mb-md {
+  margin-bottom: 30px;
+}
+.block-mb-lg {
+  margin-bottom: 60px;
+}
+
+body {
+  padding-top: 50px;
+}
+.starter-template {
+  padding: 40px 15px;
+  text-align: center;
+}

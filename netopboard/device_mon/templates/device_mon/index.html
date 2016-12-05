@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}NetBoard{% endblock title %}
+
+{% block extrahead %}
+
+{% endblock extrahead %}
+
+{% block content %}
+
+    <h3 class="page-header">NetworkDashBoard</h3>
+    <div class="col-md-7">
+    <form>
+        <input type="text" id="device_search" class="form-control" placeholder="Router Search">
+    </form>
+
+    <table class="table table-bordered table-condensed sortable table-hover" data-sort-key="0" id="bgp_statuses">
+      <thead>
+      <tr>
+        <th>Hostname</th>
+        <th>Address</th>
+        <th>Access</th>
+        <th>Detail</th>
+      </tr>
+      <tbody>
+            {% for device in devices %}
+            <tr>
+                <div class="form-group">
+                    <td><strong>{{ device.hostname }}</strong></td>
+                    <td class="target-data">{{ device.management_ip }}</td>
+                    {% if device.status == 1 %}
+                    <td><button type="submit" class="btn btn-success btn-xs btn-block " disabled="disabled">OK</button></td>
+                    <form class = "form-inline" action="{% url 'device_mon:result' %}" method="post" role="form">
+                        <input type="hidden" name="routerinfo_id" value="{{ device.id }}">
+                        {% csrf_token %}
+                        <td><button type="submit" class="btn btn-primary btn-xs btn-block">Check</button></td>
+                    </form>
+                    {% else %}
+                    <td><button type="submit" class="btn btn-danger btn-xs btn-block" disabled="disabled">NG</button></td>
+                    <td><button type="submit" class="btn btn-default btn-xs btn-block" disabled="disabled">Check</button></td>
+                    {% endif %}
+                </div>
+            </tr>
+            {% endfor %}
+      </tbody>
+      </table>
+    </div>
+
+    <script>
+    $(function () {
+      $('input#device_search').quicksearch('table tbody tr');
+    });
+    </script>
+
+{% endblock content %}
