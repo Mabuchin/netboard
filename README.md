@@ -3,7 +3,7 @@ This is Django application that monitors router in realtime.
 It is possible to check BGP, Interface, CPU, Memory, Log, any command.
 It corresponds to IOS-XR and JUNOS.
 
-![dashboard_sample](https://github.com/Mabuchin/netboard/tree/master/image/netboard_sample.png)
+![dashboard_sample](https://raw.github.com/wiki/Mabuchin/netboard/image/netboard_sample.png)
 
 # How to use
 
