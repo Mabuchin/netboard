@@ -31,7 +31,7 @@
                     {% if device.status == 1 %}
                     <td><button type="submit" class="btn btn-success btn-xs btn-block " disabled="disabled">OK</button></td>
                     <form class = "form-inline" action="{% url 'device_mon:result' %}" method="post" role="form">
-                        <input type="hidden" name="routerinfo_id" value="{{ device.id }}">
+                        <input type="hidden" name="device_id" value="{{ device.id }}">
                         {% csrf_token %}
                         <td><button type="submit" class="btn btn-primary btn-xs btn-block">Check</button></td>
                     </form>

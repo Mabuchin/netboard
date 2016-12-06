@@ -3,6 +3,7 @@ certifi==2016.9.26
 cffi==1.9.1
 cryptography==1.6
 Django==1.10.4
+django-bootstrap-form==3.2.1
 enum34==1.1.6
 Exscript==2.1.503
 idna==2.1
@@ -15,4 +16,3 @@ pyping==0.0.5
 singledispatch==3.4.0.3
 six==1.10.0
 tornado==4.4.2
-virtualenv==15.1.0

@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+{% load bootstrap %}
+
+{% block title %}ROUTER STATUS CHECKER{% endblock title %}
+
+{% block extrahead %}
+<script type="text/javascript">
+
+</script>
+{% endblock extrahead %}
+
+{% block content %}
+
+    <div class = "col-md-11 block-mt-md">
+    <h3>Target : {{ hostname }}</h3>
+      <div style="margin-top: 20px;margin-left: 5px">
+        <div class = "row">
+          <div class = "col-md-6">
+          <input class="form-control" type="text" placeholder="Please input 'show ~~' command" name="plain_cmd" id ="cmd">
+          </div>
+          <button type="submit" class="btn btn-primary btn-md" id="cmd_exec_btn">RUN</button>
+        </div>
+      </div>
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Interface</th>
+                    <th>In traffic</th>
+                    <th>Out traffic</th>
+                </tr>
+            </thead>
+            <tbody>
+                    <tr>
+                    <td>
+                        <div class="form-group">
+                            <div class="row">
+                                <div class="col-md-6">
+                                <select class="form-control" name="interface_list" id="if_index_val">
+                                {% for interface in interfaces %}
+                                    <option value={{ interface.ifindex }} >{{ interface.name }}:{{ interface.descr }}</option>
+                                {% endfor %}
+                                </select>
+                                </div>
+                                <button type="submit" class="btn btn-success" id="graph_add">Capture</button>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div id="traffic_in"></div>
+                    </td>
+                    <td>
+                        <div id="traffic_out"></div>
+                    </td>
+
+                    </tr>
+                    <tr>
+                        <td colspan="3"><div id="traffic_chart" height="240"></div></td>
+                    </tr>
+            </tbody>
+        </table>
+
+    <div style="margin: 20px">
+        <div class="row">
+          <div class="col-md-7" style="vertical-align:bottom;">
+            <h3>BGP Status <button type="submit" class="btn btn-danger" id="update">UPDATE</button> </h3>
+            <div id="if_bgp_content">
+                {% include 'device_mon/reload_block.html' %}
+            </div>
+          </div>
+        <div class="col-md-4">
+            <h3 style="">Processes</h3>
+            <table class="table table-bordered table-condensed">
+              <tr>
+                <th>CPU Use</th>
+              </tr>
+              <tr>
+                <td>
+                  <div id="cpu_chart"></div>
+                </td>
+              </tr>
+              <tr>
+                <th>Memory Use</th>
+              </tr>
+              <tr>
+                <td>
+                  <div id="memory_chart"></div>
+                </td>
+              </tr>
+            </table>
+        </div>
+        </div>
+        <h3 style="">Logs</h3>
+        <table class="table table-bordered table-condensed sortable" data-sort-key="0" id="log_table">
+
+            <tr>
+                  <th>Last 50</th>
+            </tr>
+
+            <tbody>
+              <tr>
+                <td>
+                  <pre>{% for value in status.logs %}{{ value.message }}
+{% endfor %}</pre>
+                </td>
+              </tr>
+            </tbody>
+        </table>
+    </div>
+  </div>
+    <div id="cmd_exec_result">
+    {% include 'device_mon/cmd_modal.html' %}
+    </div>
+<style type="text/css">
+<!--
+pre {
+    overflow: auto;
+    max-height: 30em;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+-->
+</style>
+
+<script type="text/javascript">
+
+  var bgp_status_url = "{% url 'device_mon:reload' device_id=device_id %}"
+  var cmd_exec_url = "{% url 'device_mon:cmd_response' device_id=device_id cmd='None'%}"
+  var ws_proc_url = "ws://localhost:8090/device_mon/procws/"
+  var ws_tr_url = "ws://localhost:8080/device_mon/trws/"
+  var ip = '{{ ip }}'
+  var os = '{{ os }}'
+  var community = '{{ community }}'
+
+
+  var AjaxReload = function(url,target_id,proc_init) { //proc_init : 0=None 1=Exec
+          $.ajax({
+                 url: url,
+                 dataType: 'html',
+                 beforeSend: function(){
+                    dispLoading("Now Loading...");
+                  },
+                 success: function(data) {
+                     $(target_id).html(data);
+                     if(proc_init==1){
+                       initProcessCharts(ws_proc_url,ip,community);
+                      }
+                 },
+                 error:function() {
+                     alert('Reload Error!');
+                     removeLoading();
+                 },
+                 complete : function() {
+                     removeLoading();
+                     if(target_id=="#cmd_exec_result"){
+                        $('#commandModal').modal('show')
+                     }
+                 }
+          });
+  }
+
+  jQuery(function ($) {
+      $("#update").click(function() {
+          AjaxReload(bgp_status_url,"#if_bgp_content",0);
+      });
+  });
+
+  jQuery(function ($) {
+      $("#cmd_exec_btn").click(function() {
+          cmd = document.getElementById("cmd").value;
+          regExp = new RegExp( " ", "g" ) ;
+          cmd = cmd.replace( regExp , '_' ) ;
+          regExp = new RegExp( "None", "g" ) ;
+          cmd_url = cmd_exec_url.replace( regExp , cmd ) ;
+          AjaxReload (cmd_url,"#cmd_exec_result",0);
+
+      });
+  });
+
+  $(function() {
+      //graph_addがクリックされたらinterface_indexの値を取得し，グラフ描写スタート
+     $('#graph_add').click(function() {
+          var selectVal = $("#if_index_val").val();
+          initTrafficCharts(selectVal,ws_tr_url,ip,community);
+          });
+  });
+
+  $(document).ready(function() {
+        AjaxReload(bgp_status_url,"#if_bgp_content",1);
+        document.getElementById('traffic_out').innerHTML = 'Ready';
+        document.getElementById('traffic_in').innerHTML = 'Ready';
+      });
+
+
+  function dispLoading(msg){
+      var dispMsg = "";
+      if( msg != "" ){
+          dispMsg = "<div class='loadingMsg'>" + msg + "</div>";
+      }
+      if($("#loading").size() == 0){
+          $("body").append("<div id='loading'>" + dispMsg + "</div>");
+      }
+  }
+  // Loadingイメージ削除関数
+  function removeLoading(){
+   $("#loading").remove();
+  }
+
+
+  var initTrafficCharts = function(interface_index,socket_url,ip,community){
+    var traffic_chart =trafficChart('traffic_chart', {});
+    ws = new WebSocket(socket_url);
+    //ws.AllowUnstrustedCertificate = true;
+    console.log('Status Connection start')
+    ws.onopen = function() {
+      console.log('Send start message')
+      console.log(interface_index);
+      ws.send(JSON.stringify({
+        type: 'hello',
+        value : {
+          ifindex : interface_index,
+          ip : ip,
+          community : community,
+        },
+      }));
+    };
+    ws.onerror = function(e){
+      $("p#error").text('could not join to the server');
+      console.log('Connection faild....')
+    };
+    ws.onmessage = function(event) {
+      var data = JSON.parse(event.data);
+      var timestamp = data['timestamp']*1000;
+      var value = data['traffic_in']
+      document.getElementById('traffic_in').innerHTML = convert_bps(value);
+      traffic_chart.series[0].addPoint([timestamp, value], true, true);
+      value = data['traffic_out']
+      document.getElementById('traffic_out').innerHTML = convert_bps(value);
+      traffic_chart.series[1].addPoint([timestamp, value], true, true);
+      ws.send(JSON.stringify({
+        type: 'hello',
+        value : {
+          ifindex : interface_index,
+          ip : ip,
+          community : community,
+        },
+      }));
+    };
+    window.onbeforeunload = function () {
+      ws.onclose = function () {console.log('unlodad')};
+      ws.send(JSON.stringify({
+        type: 'close'
+      }));
+      ws.close()
+    };
+
+  }
+
+  var initProcessCharts = function(socket_url,ip,community){
+    var cpu_chart = cpuChart('cpu_chart', {});
+    var mem_chart =memoryChart('memory_chart', {});
+    pws = new WebSocket(socket_url);
+    console.log('Connection start (Mem,CPU)')
+    pws.onopen = function() {
+      console.log('Send start message')
+      pws.send(JSON.stringify({
+        type: 'hello',
+        value : {
+          ip : ip,
+          os : os,
+          community : community,
+        },
+      }));
+    };
+    pws.onerror = function(e){
+      $("p#error").text('could not join to the server');
+      console.log('Connection faild....')
+    };
+    pws.onmessage = function(event) {
+      var data = JSON.parse(event.data);
+      var cpu_use = data['cpu_use']
+      var mem_use = data['mem_use']
+      var timestamp = data['timestamp']*1000;
+      cpu_chart.series[0].addPoint([timestamp, cpu_use], true, true);
+      mem_chart.series[0].addPoint([timestamp, mem_use], true, true);
+
+      pws.send(JSON.stringify({
+        type: 'hello',
+        value : {
+          ip : ip,
+          os : os,
+          community : community,
+        },
+      }));
+    };
+    window.onbeforeunload = function () {
+      pws.onclose = function () {console.log('unlodad')};
+      pws.send(JSON.stringify({
+        type: 'close'
+      }));
+      pws.close()
+    };
+  }
+
+</script>
+
+{% endblock content %}

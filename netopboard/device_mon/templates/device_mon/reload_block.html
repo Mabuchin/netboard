@@ -1,0 +1,59 @@
+
+        <table class="table table-bordered table-condensed sortable" data-sort-key="0" id="bgp_statuses">
+          <thead>
+          <tr>
+            <th>Neighbor</th>
+            <th>AS</th>
+            <th>AS Name</th>
+            <th>State</th>
+            <th>Route</th>
+          </tr>
+          <thead>
+          <tbody>
+                {% for value in status.bgp %}
+                <tr>
+                <td>{{ value.neighbor }}</td>
+                <td>{{ value.as }}</td>
+                <td>{{ value.as_org }}</td>
+                {% if value.status == "Establ" %}
+                <td><span class="label label-success">{{ value.status }}</span></td>
+                {% else %}
+                <td><span class="label label-danger">{{ value.status }}</span></td>
+                {% endif %}
+                <td>{{ value.route }}</td>
+                </tr>
+                {% endfor %}
+          </tbody>
+          </table>
+
+          <h2 style="">Interfaces</h2>
+          <table class="table table-bordered table-condensed sortable" data-sort-key="0" id="interface_statuses_table">
+              <thead>
+              <tr>
+                    <th>Interface</th>
+                    <th>Description</th>
+                    <th>Admin</th>
+                    <th>Physical</th>
+              </tr>
+              <thead>
+              <tbody>
+
+                {% for value in status.interface %}
+                <tr>
+                    <td>{{ value.interface_name }}</td>
+                    <td>{{ value.description }}</td>
+                    {% if value.admin == "up" %}
+                        <td><span class="label label-success">{{ value.admin }}</span></td>
+                    {% else %}
+                        <td><span class="label label-danger">{{ value.admin }}</span></td>
+                    {% endif %}
+                    {% if value.physical == "up" %}
+                        <td><span class="label label-success">{{ value.physical }}</span></td>
+                    {% else %}
+                        <td><span class="label label-danger">{{ value.physical }}</span></td>
+                    {% endif %}
+                </tr>
+                {% endfor %}
+
+              </tbody>
+          </table>
