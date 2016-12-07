@@ -56,7 +56,6 @@ class SendWebSocket(tornado.websocket.WebSocketHandler):
         try:
             result.update({'traffic_in' : traffic_in , 'traffic_out' : traffic_out})
             result.update({'timestamp' : time.mktime(datetime.now().timetuple())})
-            print "traffic(in) : %d  traffic(out) : %d [pos_counter_in : %d , pos_counter_out : %d]"%(traffic_in,traffic_out,pos_counter_in,pos_counter_out)
             self.write_message(json.dumps(result))
         except:
             print "Client is already disconnectted."

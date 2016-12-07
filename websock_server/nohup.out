@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "if_traffic_wss.py", line 83, in <module>
+    app.listen(options.port)
+  File "/Users/mabuchi/local-dev/netboard/netenv/lib/python2.7/site-packages/tornado/web.py", line 1850, in listen
+    server.listen(port, address)
+  File "/Users/mabuchi/local-dev/netboard/netenv/lib/python2.7/site-packages/tornado/tcpserver.py", line 126, in listen
+    sockets = bind_sockets(port, address=address)
+  File "/Users/mabuchi/local-dev/netboard/netenv/lib/python2.7/site-packages/tornado/netutil.py", line 194, in bind_sockets
+    sock.bind(sockaddr)
+  File "/usr/local/Cellar/python/2.7.9/Frameworks/Python.framework/Versions/2.7/lib/python2.7/socket.py", line 224, in meth
+    return getattr(self._sock,name)(*args)
+socket.error: [Errno 48] Address already in use

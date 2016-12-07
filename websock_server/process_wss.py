@@ -33,9 +33,9 @@ class SendWebSocket(tornado.websocket.WebSocketHandler):
             IP = json.loads(message['data'])['value']['ip']
             OS = json.loads(message['data'])['value']['os']
             if OS == 'JUNOS':
-                oid_mem_use = UNIX_LOADINT
+                oid_mem_use = JUNOS_MEM_USE
                 oid_mem_free = None
-                oid_cpu_use = UNIX_LOADINT
+                oid_cpu_use = JUNOS_CPU_USE
             elif OS == 'IOSXR':
                 oid_mem_use = IOSXR_MEM_USE
                 oid_mem_free = IOSXR_MEM_FREE
@@ -57,9 +57,8 @@ class SendWebSocket(tornado.websocket.WebSocketHandler):
             cpu_use = int(self.exe_snmp(snmp_cmd_cpu_use))
 
         try:
-            result.update({'cpu_use' : cpu_use/10 , 'mem_use' : mem_use*40/100})
+            result.update({'cpu_use' : cpu_use , 'mem_use' : mem_use})
             result.update({'timestamp' : time.mktime(datetime.now().timetuple())})
-            print "mem_use : %d  cpu_use : %d"%(mem_use,cpu_use)
             self.write_message(json.dumps(result))
         except:
             print "Client is already disconnectted."

@@ -21,9 +21,21 @@ It corresponds to IOS-XR and JUNOS.
  
     `nginx`+`uwsgi`,or `python manage.py runserver 0.0.0.0:8000`
  5. Input device data
+
+    Let's access Netboard's admin page.
+    Input the target device information.
+    `http://yourdomain/admin/`
  6. Rewrite `device_mon/templates/device_mon/result.html`
 
     ```
         var ws_proc_url = "ws://localhost:8090/device_mon/procws/" //Rewrite to your URL
         var ws_tr_url = "ws://localhost:8080/device_mon/trws/" //Rewrite to your URL
+    ```
+ 7. Launch WebsocketServer
+
+    LISTEN 8080 and 8090 ports.
+    ```
+    cd websock_server
+    nohup python if_traffic_wss.py &
+    nohup python process_wss.py &
     ```
